@@ -1,0 +1,2 @@
+-r backend_requirements.txt
+-r frontend_requirements.txt

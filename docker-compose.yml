@@ -1,0 +1,47 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: teaching_app_db
+    restart: always
+    environment:
+      POSTGRES_DB: teaching_app
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: teaching_app_backend
+    restart: always
+    environment:
+      DATABASE_URL: postgresql+psycopg2://postgres:postgres@postgres:5432/teaching_app
+      UPLOAD_DIR: /app/uploads
+    depends_on:
+      - postgres
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./uploads:/app/uploads
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: teaching_app_frontend
+    restart: always
+    environment:
+      API_BASE_URL: http://backend:8000
+      PUBLIC_API_BASE_URL: ${PUBLIC_API_BASE_URL:-http://200.141.0.100:8000}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-davschool123}
+      CONTACT_NUMBER: ${CONTACT_NUMBER:-}
+    depends_on:
+      - backend
+    ports:
+      - "8502:8501"
+
+volumes:
+  postgres_data:
+  uploads_data:
